@@ -1,51 +1,67 @@
-﻿using SurveyBasket.API.Model;
+﻿using Mapster;
+using Microsoft.EntityFrameworkCore;
+using SurveyBasket.API.Contracts.Responses;
+using SurveyBasket.API.Models;
 
 namespace SurveyBasket.API.Services
 {
 	public interface IPollService
 	{
-		Poll? Get(int id);
-		List<Poll> GetAll();
-		Poll Add(Poll poll);
-		bool Update(int id, Poll poll);
-		bool Delete(int id);
+		Task<List<Poll>> GetAllAsync();
+		Task<Poll>? GetAsync(int id);
+		Task<Poll> AddAsync(Poll poll, CancellationToken cancellationToken = default);
+		Task<bool> UpdateAsync(int id, Poll poll);
+		Task<bool> DeleteAsync(int id);
 	}
-	public class PollService : IPollService
+	public class PollService(ApplicationDbContext db) : IPollService
 	{
-		private static readonly List<Poll> _polls = [
-			new Poll{Id =1,Title="poll1 Title",Description = "Poll1 Desc"}
-		];
+		private readonly ApplicationDbContext _db = db;
 
-		public Poll? Get(int id) => _polls.SingleOrDefault(e => e.Id == id);
-		public List<Poll> GetAll() => _polls;
-
-		public Poll Add(Poll poll)
+		public async Task<List<Poll>> GetAllAsync()
 		{
-			poll.Id = _polls.Count + 1;
-			_polls.Add(poll);
+			List<Poll> polls = await _db.Polls.AsNoTracking().ToListAsync();
+			return polls;
+		}
+
+		public async Task<Poll?> GetAsync(int id)
+		{
+			Poll poll = await _db.Polls.FindAsync(id);
 			return poll;
 		}
-		public bool Update(int id, Poll poll)
-		{
-			Poll pollToUpdate = Get(id);
 
-			if (pollToUpdate == null)
+		public async Task<Poll> AddAsync(Poll poll, CancellationToken cancellationToken = default)
+		{
+			await _db.Polls.AddAsync(poll, cancellationToken);
+			await _db.SaveChangesAsync(cancellationToken);
+			return poll;
+		}
+
+		public async Task<bool> UpdateAsync(int id, Poll poll)
+		{
+			Poll pollToUpdate = await GetAsync(id);
+
+			if (pollToUpdate is null)
 				return false;
 
 			pollToUpdate.Title = poll.Title;
-			pollToUpdate.Description = poll.Description;
+			pollToUpdate.Summary = poll.Summary;
+			pollToUpdate.IsPublished = poll.IsPublished;
+			pollToUpdate.StartsAt = poll.StartsAt;
+			pollToUpdate.EndsAt = poll.EndsAt;
 
+			await _db.SaveChangesAsync();
 			return true;
 		}
-		public bool Delete(int id)
-		{
-			Poll pollToDelete = Get(id);
 
-			if (pollToDelete == null)
+		public async Task<bool> DeleteAsync(int id)
+		{
+			Poll pollToDelete = await GetAsync(id);
+
+			if (pollToDelete is null)
 				return false;
 
-			_polls.Remove(pollToDelete);
-
+			_db.Polls.Remove(pollToDelete);
+			await _db.SaveChangesAsync();
 			return true;
 		}
 	}

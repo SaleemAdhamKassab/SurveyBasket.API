@@ -1,5 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SurveyBasket.API.Model;
+﻿using FluentValidation;
+using Mapster;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using SurveyBasket.API.Contracts.Requests;
+using SurveyBasket.API.Contracts.Responses;
+using SurveyBasket.API.Models;
 using SurveyBasket.API.Services;
 
 namespace SurveyBasket.API.Controllers
@@ -11,43 +16,47 @@ namespace SurveyBasket.API.Controllers
 		private readonly IPollService _pollService = pollService;
 
 		[HttpGet]
-		public IActionResult GetAll() => Ok(_pollService.GetAll());
-
+		public async Task<IActionResult> GetAll()
+		{
+			List<Poll> polls = await _pollService.GetAllAsync();
+			List<PollResponse> result = polls.Adapt<List<PollResponse>>();
+			return Ok(result);
+		}
 
 		[HttpGet("{id}")]
-		public IActionResult Get(int id)
+		public async Task<IActionResult> Get(int id)
 		{
-			Poll poll = _pollService.Get(id);
+			Poll poll = await _pollService.GetAsync(id);
 
 			if (poll is null)
-				return NotFound($"invalid poll Id: {id}");
-			return Ok(poll);
+				return NotFound();
+
+			var response = poll.Adapt<PollResponse>();
+
+			return Ok(response);
 		}
 
 		[HttpPost]
-		public IActionResult Add(Poll poll)
+		public async Task<IActionResult> Add(PollRequest request, CancellationToken cancellationToken)
 		{
-			if (poll is null)
+			if (request is null)
 				return BadRequest();
 
-			Poll createdPoll = _pollService.Add(poll);
-
+			Poll createdPoll = await _pollService.AddAsync(request.Adapt<Poll>(), cancellationToken);
 			return CreatedAtAction(nameof(Get), new { id = createdPoll.Id }, createdPoll);
 		}
 
 		[HttpPut("{id}")]
-		public IActionResult Update(int id, Poll poll)
+		public async Task<IActionResult> Update(int id, PollRequest request)
 		{
-			bool isUpdated = _pollService.Update(id,poll);
-
+			bool isUpdated = await _pollService.UpdateAsync(id, request.Adapt<Poll>());
 			return !isUpdated ? NotFound() : NoContent();
 		}
 
 		[HttpDelete("{id}")]
-		public IActionResult Delete(int id)
+		public async Task<IActionResult> Delete(int id)
 		{
-			bool isDeleted = _pollService.Delete(id);
-
+			bool isDeleted = await _pollService.DeleteAsync(id);
 			return !isDeleted ? NotFound() : NoContent();
 		}
 	}
