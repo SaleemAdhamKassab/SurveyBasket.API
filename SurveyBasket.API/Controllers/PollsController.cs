@@ -2,14 +2,13 @@
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using SurveyBasket.API.Contracts.Requests;
-using SurveyBasket.API.Contracts.Responses;
+using SurveyBasket.API.Contracts.Polls;
 using SurveyBasket.API.Models;
 using SurveyBasket.API.Services;
 
 namespace SurveyBasket.API.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class PollsController(IPollService pollService) : ControllerBase
 	{
@@ -58,6 +57,13 @@ namespace SurveyBasket.API.Controllers
 		{
 			bool isDeleted = await _pollService.DeleteAsync(id);
 			return !isDeleted ? NotFound() : NoContent();
+		}
+
+		[HttpPut("{id}/TogglePublish")]
+		public async Task<IActionResult> TogglePublish(int id)
+		{
+			bool isToggled = await _pollService.TogglePublishStatusAsync(id);
+			return !isToggled ? NotFound() : NoContent();
 		}
 	}
 }

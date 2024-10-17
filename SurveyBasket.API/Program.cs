@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using SurveyBasket.API;
-using SurveyBasket.API.Models;
+using SurveyBasket.API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDependecies();
+builder.Services.AddDependecies(builder.Configuration);
 
 var app = builder.Build();
 

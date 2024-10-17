@@ -1,17 +1,18 @@
 ﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
-using SurveyBasket.API.Contracts.Responses;
+using SurveyBasket.API.Data;
 using SurveyBasket.API.Models;
 
 namespace SurveyBasket.API.Services
 {
-	public interface IPollService
+    public interface IPollService
 	{
 		Task<List<Poll>> GetAllAsync();
 		Task<Poll>? GetAsync(int id);
 		Task<Poll> AddAsync(Poll poll, CancellationToken cancellationToken = default);
 		Task<bool> UpdateAsync(int id, Poll poll);
 		Task<bool> DeleteAsync(int id);
+		Task<bool> TogglePublishStatusAsync(int id);
 	}
 	public class PollService(ApplicationDbContext db) : IPollService
 	{
@@ -61,6 +62,17 @@ namespace SurveyBasket.API.Services
 				return false;
 
 			_db.Polls.Remove(pollToDelete);
+			await _db.SaveChangesAsync();
+			return true;
+		}
+		 
+		public async Task<bool> TogglePublishStatusAsync(int id)
+		{
+			Poll poll = await _db.Polls.FindAsync(id);
+			if (poll is null)
+				return false;
+
+			poll.IsPublished = !poll.IsPublished;
 			await _db.SaveChangesAsync();
 			return true;
 		}
