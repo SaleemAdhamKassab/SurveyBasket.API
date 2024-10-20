@@ -1,15 +1,15 @@
-﻿using FluentValidation;
-using Mapster;
+﻿using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using SurveyBasket.API.Contracts.Polls;
 using SurveyBasket.API.Models;
 using SurveyBasket.API.Services;
 
 namespace SurveyBasket.API.Controllers
 {
-    [Route("api/[controller]")]
+	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class PollsController(IPollService pollService) : ControllerBase
 	{
 		private readonly IPollService _pollService = pollService;
@@ -42,7 +42,7 @@ namespace SurveyBasket.API.Controllers
 				return BadRequest();
 
 			Poll createdPoll = await _pollService.AddAsync(request.Adapt<Poll>(), cancellationToken);
-			return CreatedAtAction(nameof(Get), new { id = createdPoll.Id }, createdPoll);
+			return CreatedAtAction(nameof(Get), new { id = createdPoll.Id }, createdPoll.Adapt<PollResponse>());
 		}
 
 		[HttpPut("{id}")]

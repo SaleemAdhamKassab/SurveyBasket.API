@@ -11,7 +11,7 @@ namespace SurveyBasket.API.Controllers
 		private readonly IAuthService _authService = authService;
 
 
-		[HttpPost]
+		[HttpPost("Login")]
 		public async Task<IActionResult> LoginAsync(LoginRequest request)
 		{
 			var authResult = await _authService.GetTokenAsync(request.Email, request.Password);
@@ -19,7 +19,7 @@ namespace SurveyBasket.API.Controllers
 			return authResult is null ? BadRequest("Invalid Email or Password") : Ok(authResult);
 		}
 
-		[HttpPost("refreshToken")]
+		[HttpPost("RefreshToken")]
 		public async Task<IActionResult> refreshToken(RefreshTokenRequest request)
 		{
 			var authResult = await _authService.GetRefreshTokenAsync(request.token, request.refreshToken);
@@ -27,7 +27,7 @@ namespace SurveyBasket.API.Controllers
 			return authResult is null ? BadRequest("Invalid token") : Ok(authResult);
 		}
 
-		[HttpPut("refokeRefreshToken")]
+		[HttpPut("RefokeRefreshToken")]
 		public async Task<IActionResult> refokeRefreshToken(RefreshTokenRequest request)
 		{
 			var isRefoked = await _authService.RefokeRefreshTokenAsync(request.token, request.refreshToken);
