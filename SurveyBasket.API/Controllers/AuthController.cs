@@ -14,9 +14,8 @@ namespace SurveyBasket.API.Controllers
 		[HttpPost("Login")]
 		public async Task<IActionResult> LoginAsync(LoginRequest request)
 		{
-			var authResult = await _authService.GetTokenAsync(request.Email, request.Password);
-
-			return authResult is null ? BadRequest("Invalid Email or Password") : Ok(authResult);
+			var result = await _authService.GetTokenAsync(request.Email, request.Password);
+			return result.IsSuccess ? Ok(result.Value) : Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Description);
 		}
 
 		[HttpPost("RefreshToken")]

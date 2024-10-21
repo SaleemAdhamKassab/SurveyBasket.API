@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using SurveyBasket.API.Abstractions;
 using SurveyBasket.API.Contracts.Auth;
-using SurveyBasket.API.Data;
+using SurveyBasket.API.Errors;
 using SurveyBasket.API.Models;
 using System.Security.Cryptography;
 
@@ -8,7 +9,7 @@ namespace SurveyBasket.API.Services.Auth
 {
 	public interface IAuthService
 	{
-		Task<AuthResponse?> GetTokenAsync(string email, string password);
+		Task<Result<AuthResponse>> GetTokenAsync(string email, string password);
 		Task<AuthResponse?> GetRefreshTokenAsync(string token, string refreshToken);
 		Task<bool> RefokeRefreshTokenAsync(string token, string refreshToken);
 	}
@@ -20,22 +21,18 @@ namespace SurveyBasket.API.Services.Auth
 		private readonly int _refreshTokenExpireDays = 14;
 
 
-		private string genereateRefreshToken()
-		{
-			return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-		}
+		private string genereateRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
 
-
-		public async Task<AuthResponse?> GetTokenAsync(string email, string password)
+		public async Task<Result<AuthResponse>> GetTokenAsync(string email, string password)
 		{
 			var user = await _userManager.FindByEmailAsync(email);
 			if (user is null)
-				return null;
+				return Result.Failure<AuthResponse>(UserErrors.InvalidCredintials);
 
 			var isValidPassword = await _userManager.CheckPasswordAsync(user, password);
 			if (!isValidPassword)
-				return null;
+				return Result.Failure<AuthResponse>(UserErrors.InvalidCredintials);
 
 			var (token, expiresIn) = _jwtProvider.GenerationToken(user);
 
@@ -52,7 +49,7 @@ namespace SurveyBasket.API.Services.Auth
 			await _userManager.UpdateAsync(user);
 
 			AuthResponse authResponse = new(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
-			return authResponse;
+			return Result.Success(authResponse);
 		}
 
 		public async Task<AuthResponse?> GetRefreshTokenAsync(string token, string refreshToken)
