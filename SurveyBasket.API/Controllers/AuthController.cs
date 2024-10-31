@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SurveyBasket.API.Abstractions;
 using SurveyBasket.API.Contracts.Auth;
 using SurveyBasket.API.Services.Auth;
 
@@ -6,32 +7,31 @@ namespace SurveyBasket.API.Controllers
 {
 	[Route("[controller]")]
 	[ApiController]
-	public class AuthController(IAuthService authService) : ControllerBase
+	public class AuthController(IAuthService authService, ILogger<AuthController> logger) : ControllerBase
 	{
 		private readonly IAuthService _authService = authService;
+		private readonly ILogger<AuthController> _logger = logger;
 
-
-		[HttpPost("Login")]
-		public async Task<IActionResult> LoginAsync(LoginRequest request)
+		[HttpPost("login")]
+		public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
 		{
-			var result = await _authService.GetTokenAsync(request.Email, request.Password);
-			return result.IsSuccess ? Ok(result.Value) : Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Description);
+			var authResult = await _authService.GetTokenAsync(request.Email, request.Password);
+			return authResult.IsSuccess ? Ok(authResult.Value) : authResult.ToProblem(StatusCodes.Status400BadRequest);
 		}
 
-		[HttpPost("RefreshToken")]
-		public async Task<IActionResult> refreshToken(RefreshTokenRequest request)
+		[HttpPost("refresh")]
+		public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequest request)
 		{
-			var authResult = await _authService.GetRefreshTokenAsync(request.token, request.refreshToken);
-
-			return authResult is null ? BadRequest("Invalid token") : Ok(authResult);
+			var authResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken);
+			return authResult.IsSuccess ? Ok(authResult.Value) : authResult.ToProblem(StatusCodes.Status400BadRequest);
 		}
 
-		[HttpPut("RefokeRefreshToken")]
-		public async Task<IActionResult> refokeRefreshToken(RefreshTokenRequest request)
+		[HttpPost("revoke-refresh-token")]
+		public async Task<IActionResult> RevokeRefreshTokenAsync([FromBody] RefreshTokenRequest request)
 		{
-			var isRefoked = await _authService.RefokeRefreshTokenAsync(request.token, request.refreshToken);
+			var result = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken);
 
-			return isRefoked ? Ok() : BadRequest();
+			return result.IsSuccess ? Ok() : result.ToProblem(StatusCodes.Status400BadRequest);
 		}
 	}
 }

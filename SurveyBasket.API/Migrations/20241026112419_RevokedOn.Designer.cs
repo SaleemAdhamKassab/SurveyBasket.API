@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SurveyBasket.API.Data;
 
@@ -11,9 +12,11 @@ using SurveyBasket.API.Data;
 namespace SurveyBasket.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241026112419_RevokedOn")]
+    partial class RevokedOn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -155,33 +158,6 @@ namespace SurveyBasket.API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("SurveyBasket.API.Models.Answer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("QuestionId", "Content")
-                        .IsUnique();
-
-                    b.ToTable("Answers");
-                });
-
             modelBuilder.Entity("SurveyBasket.API.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -309,50 +285,6 @@ namespace SurveyBasket.API.Migrations
                     b.ToTable("Polls");
                 });
 
-            modelBuilder.Entity("SurveyBasket.API.Models.Question", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("CreatedById")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("PollId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdateOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedById")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("UpdatedById");
-
-                    b.HasIndex("PollId", "Content")
-                        .IsUnique();
-
-                    b.ToTable("Questions");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -404,17 +336,6 @@ namespace SurveyBasket.API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SurveyBasket.API.Models.Answer", b =>
-                {
-                    b.HasOne("SurveyBasket.API.Models.Question", "Question")
-                        .WithMany("Answers")
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Question");
-                });
-
             modelBuilder.Entity("SurveyBasket.API.Models.ApplicationUser", b =>
                 {
                     b.OwnsMany("SurveyBasket.API.Models.RefreshToken", "RefreshTokens", b1 =>
@@ -457,7 +378,7 @@ namespace SurveyBasket.API.Migrations
                     b.HasOne("SurveyBasket.API.Models.ApplicationUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("SurveyBasket.API.Models.ApplicationUser", "UpdatedBy")
@@ -467,41 +388,6 @@ namespace SurveyBasket.API.Migrations
                     b.Navigation("CreatedBy");
 
                     b.Navigation("UpdatedBy");
-                });
-
-            modelBuilder.Entity("SurveyBasket.API.Models.Question", b =>
-                {
-                    b.HasOne("SurveyBasket.API.Models.ApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SurveyBasket.API.Models.Poll", "Poll")
-                        .WithMany("Questions")
-                        .HasForeignKey("PollId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SurveyBasket.API.Models.ApplicationUser", "UpdatedBy")
-                        .WithMany()
-                        .HasForeignKey("UpdatedById");
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("Poll");
-
-                    b.Navigation("UpdatedBy");
-                });
-
-            modelBuilder.Entity("SurveyBasket.API.Models.Poll", b =>
-                {
-                    b.Navigation("Questions");
-                });
-
-            modelBuilder.Entity("SurveyBasket.API.Models.Question", b =>
-                {
-                    b.Navigation("Answers");
                 });
 #pragma warning restore 612, 618
         }

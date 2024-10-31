@@ -8,8 +8,8 @@ namespace SurveyBasket.API.Models
 		public string Token { get; set; } = string.Empty;
 		public DateTime AddedOn { get; set; }
 		public DateTime ExpiresOn { get; set; }
-		public DateTime? RefokedOn { get; set; }
+		public DateTime? RevokedOn { get; set; }
 		public bool IsExpired => DateTime.UtcNow > ExpiresOn;
-		public bool IsActive => RefokedOn is null && !IsExpired;
+		public bool IsActive => RevokedOn is null && !IsExpired;
 	}
 }

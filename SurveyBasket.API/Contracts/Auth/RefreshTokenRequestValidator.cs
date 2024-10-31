@@ -6,11 +6,11 @@ namespace SurveyBasket.API.Contracts.Auth
 	{
 		public RefreshTokenRequestValidator()
 		{
-			RuleFor(e => e.token)
+			RuleFor(e => e.Token)
 				.NotEmpty()
 				.EmailAddress();
 
-			RuleFor(e => e.refreshToken)
+			RuleFor(e => e.RefreshToken)
 				.NotEmpty();
 		}
 	}

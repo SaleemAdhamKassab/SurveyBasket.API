@@ -10,8 +10,8 @@ namespace SurveyBasket.API.Services.Auth
 	public interface IAuthService
 	{
 		Task<Result<AuthResponse>> GetTokenAsync(string email, string password);
-		Task<AuthResponse?> GetRefreshTokenAsync(string token, string refreshToken);
-		Task<bool> RefokeRefreshTokenAsync(string token, string refreshToken);
+		Task<Result<AuthResponse>> GetRefreshTokenAsync(string token, string refreshToken);
+		Task<Result> RevokeRefreshTokenAsync(string token, string refreshToken);
 	}
 
 	public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider jwtProvider) : IAuthService
@@ -28,11 +28,11 @@ namespace SurveyBasket.API.Services.Auth
 		{
 			var user = await _userManager.FindByEmailAsync(email);
 			if (user is null)
-				return Result.Failure<AuthResponse>(UserErrors.InvalidCredintials);
+				return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
 			var isValidPassword = await _userManager.CheckPasswordAsync(user, password);
 			if (!isValidPassword)
-				return Result.Failure<AuthResponse>(UserErrors.InvalidCredintials);
+				return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
 			var (token, expiresIn) = _jwtProvider.GenerationToken(user);
 
@@ -52,21 +52,24 @@ namespace SurveyBasket.API.Services.Auth
 			return Result.Success(authResponse);
 		}
 
-		public async Task<AuthResponse?> GetRefreshTokenAsync(string token, string refreshToken)
+		public async Task<Result<AuthResponse>> GetRefreshTokenAsync(string token, string refreshToken)
 		{
 			var userId = _jwtProvider.ValidateToken(token);
+
 			if (userId is null)
-				return null;
+				return Result.Failure<AuthResponse>(UserErrors.InvalidJwtToken);
 
 			var user = await _userManager.FindByIdAsync(userId);
+
 			if (user is null)
-				return null;
+				return Result.Failure<AuthResponse>(UserErrors.InvalidJwtToken);
 
 			var userRefreshToken = user.RefreshTokens.SingleOrDefault(e => e.Token == refreshToken && e.IsActive);
-			if (userRefreshToken is null)
-				return null;
 
-			userRefreshToken.RefokedOn = DateTime.UtcNow;
+			if (userRefreshToken is null)
+				return Result.Failure<AuthResponse>(UserErrors.InvalidRefreshToken);
+
+			userRefreshToken.RevokedOn = DateTime.UtcNow;
 
 			var (newToken, expiresIn) = _jwtProvider.GenerationToken(user);
 
@@ -80,30 +83,36 @@ namespace SurveyBasket.API.Services.Auth
 				ExpiresOn = refreshTokenExpiration,
 				Token = newRefreshToken
 			});
+
 			await _userManager.UpdateAsync(user);
 
-			AuthResponse authResponse = new(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn, newRefreshToken, refreshTokenExpiration);
-			return authResponse;
+			AuthResponse response = new(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn, newRefreshToken, refreshTokenExpiration);
+
+			return Result.Success(response);
 		}
 
-		public async Task<bool> RefokeRefreshTokenAsync(string token, string refreshToken)
+		public async Task<Result> RevokeRefreshTokenAsync(string token, string refreshToken)
 		{
 			var userId = _jwtProvider.ValidateToken(token);
+
 			if (userId is null)
-				return false;
+				return Result.Failure(UserErrors.InvalidJwtToken);
 
 			var user = await _userManager.FindByIdAsync(userId);
+
 			if (user is null)
-				return false;
+				return Result.Failure(UserErrors.InvalidJwtToken);
 
-			var userRefreshToken = user.RefreshTokens.SingleOrDefault(e => e.Token == refreshToken && e.IsActive);
+			var userRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken && x.IsActive);
+
 			if (userRefreshToken is null)
-				return false;
+				return Result.Failure(UserErrors.InvalidRefreshToken);
 
-			userRefreshToken.RefokedOn = DateTime.UtcNow;
+			userRefreshToken.RevokedOn = DateTime.UtcNow;
+
 			await _userManager.UpdateAsync(user);
 
-			return true;
+			return Result.Success();
 		}
 	}
 }

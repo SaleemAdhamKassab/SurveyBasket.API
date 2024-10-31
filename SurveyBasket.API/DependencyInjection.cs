@@ -13,6 +13,7 @@ using System.Text;
 using SurveyBasket.API.Contracts.Auth;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
+using SurveyBasket.API.Errors;
 
 namespace SurveyBasket.API
 {
@@ -37,6 +38,11 @@ namespace SurveyBasket.API
 				.AddAuthConfig(configuration);
 
 			services.AddScoped<IPollService, PollService>();
+			services.AddScoped<IQuestionService, QuestionService>();
+
+			services.AddExceptionHandler<GlobalExceptionHandler>();
+			services.AddProblemDetails();
+
 			return services;
 		}
 
