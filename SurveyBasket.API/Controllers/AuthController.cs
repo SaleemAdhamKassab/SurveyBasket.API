@@ -33,5 +33,5 @@ namespace SurveyBasket.API.Controllers
 
 			return result.IsSuccess ? Ok() : result.ToProblem();
 		}
-	}
+	} 
 }
