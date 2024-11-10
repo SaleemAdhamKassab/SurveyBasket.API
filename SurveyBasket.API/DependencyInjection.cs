@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
-using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using SurveyBasket.API.Data;
@@ -33,12 +32,12 @@ namespace SurveyBasket.API
 
 			services
 				.AddSwaggerConfig()
-				.AddMapsterConfig()
 				.AddFluentValidationConfig()
 				.AddAuthConfig(configuration);
 
 			services.AddScoped<IPollService, PollService>();
 			services.AddScoped<IQuestionService, QuestionService>();
+			services.AddScoped<IVoteService, VoteService>();
 
 			services.AddExceptionHandler<GlobalExceptionHandler>();
 			services.AddProblemDetails();
@@ -77,13 +76,6 @@ namespace SurveyBasket.API
 						{ jwtSecurityScheme, Array.Empty<string>() }
 					});
 			});
-			return services;
-		}
-
-		private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
-		{
-			var mappingConfig = TypeAdapterConfig.GlobalSettings;
-			mappingConfig.Scan(Assembly.GetExecutingAssembly());
 			return services;
 		}
 

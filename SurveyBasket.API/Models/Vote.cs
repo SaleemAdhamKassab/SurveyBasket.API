@@ -1,17 +1,17 @@
 ﻿namespace SurveyBasket.API.Models
 {
-	public sealed class Question : AuditModel
+	public sealed class Vote
 	{
 		public int Id { get; set; }
-		public string Content { get; set; } = string.Empty;
-		public bool IsActive { get; set; } = true;
-
+		public DateTime SubmittedOn { get; set; } = DateTime.UtcNow;
 
 
 		public int PollId { get; set; }
 		public Poll Poll { get; set; } = default!;
 
-		public ICollection<Answer> Answers { get; set; } = [];
+		public string UserId { get; set; } = string.Empty;
+		public ApplicationUser User { get; set; } = default!;
+
 		public ICollection<VoteAnswer> VoteAnswers { get; set; } = [];
 	}
 }

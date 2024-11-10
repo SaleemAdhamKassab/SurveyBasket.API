@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SurveyBasket.API.Extensions;
 using SurveyBasket.API.Models;
 using System.Reflection;
 using System.Security.Claims;
@@ -15,6 +16,8 @@ namespace SurveyBasket.API.Data
 		public DbSet<Poll> Polls { get; set; }
 		public DbSet<Question> Questions { get; set; }
 		public DbSet<Answer> Answers { get; set; }
+		public DbSet<Vote> Votes { get; set; }
+		public DbSet<VoteAnswer> VoteAnswers { get; set; }
 		public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 
@@ -37,7 +40,7 @@ namespace SurveyBasket.API.Data
 		public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
 		{
 			var entries = ChangeTracker.Entries<AuditModel>();
-			string currentUserId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+			string currentUserId = _httpContextAccessor.HttpContext?.User.GetUserId()!;
 
 			foreach (var entityEntry in entries)
 			{

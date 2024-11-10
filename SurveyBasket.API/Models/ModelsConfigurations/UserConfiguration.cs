@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SurveyBasket.API.Models.ModelsConfigurations
 {
-	public class UserConfigurations : IEntityTypeConfiguration<ApplicationUser>
+	public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
 	{
 		public void Configure(EntityTypeBuilder<ApplicationUser> builder)
 		{

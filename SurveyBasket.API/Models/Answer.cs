@@ -10,5 +10,6 @@
 
 		public int QuestionId { get; set; }
 		public Question Question { get; set; } = default!;
+		public ICollection<VoteAnswer> VoteAnswers { get; set; } = [];
 	}
 }

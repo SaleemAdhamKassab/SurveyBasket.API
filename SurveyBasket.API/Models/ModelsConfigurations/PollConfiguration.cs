@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SurveyBasket.API.Models.ModelsConfigurations
 {
-	public class PollConfigurations : IEntityTypeConfiguration<Poll>
+	public class PollConfiguration : IEntityTypeConfiguration<Poll>
 	{
 		public void Configure(EntityTypeBuilder<Poll> builder)
 		{

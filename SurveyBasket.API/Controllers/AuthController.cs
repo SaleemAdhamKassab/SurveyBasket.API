@@ -16,14 +16,14 @@ namespace SurveyBasket.API.Controllers
 		public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
 		{
 			var authResult = await _authService.GetTokenAsync(request.Email, request.Password);
-			return authResult.IsSuccess ? Ok(authResult.Value) : authResult.ToProblem(StatusCodes.Status400BadRequest);
+			return authResult.IsSuccess ? Ok(authResult.Value) : authResult.ToProblem();
 		}
 
 		[HttpPost("refresh")]
 		public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequest request)
 		{
 			var authResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken);
-			return authResult.IsSuccess ? Ok(authResult.Value) : authResult.ToProblem(StatusCodes.Status400BadRequest);
+			return authResult.IsSuccess ? Ok(authResult.Value) : authResult.ToProblem();
 		}
 
 		[HttpPost("revoke-refresh-token")]
@@ -31,7 +31,7 @@ namespace SurveyBasket.API.Controllers
 		{
 			var result = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken);
 
-			return result.IsSuccess ? Ok() : result.ToProblem(StatusCodes.Status400BadRequest);
+			return result.IsSuccess ? Ok() : result.ToProblem();
 		}
 	}
 }

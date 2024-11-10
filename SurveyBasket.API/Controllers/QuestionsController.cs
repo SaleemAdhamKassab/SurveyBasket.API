@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using SurveyBasket.API.Abstractions;
 using SurveyBasket.API.Contracts.Questions;
 using SurveyBasket.API.Errors;
-using SurveyBasket.API.Models;
 using SurveyBasket.API.Services;
 
 namespace SurveyBasket.API.Controllers
@@ -21,18 +20,15 @@ namespace SurveyBasket.API.Controllers
 		{
 			var result = await _questionService.GetAllAsync(pollId);
 
-			if (result.IsSuccess)
-				return Ok(result.Value);
-
-			return result.ToProblem(StatusCodes.Status404NotFound);
-
+			return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 		}
 
 		[HttpGet("{id}")]
 		public async Task<IActionResult> Get([FromRoute] int pollId, int id)
 		{
 			var result = await _questionService.GetAsync(pollId, id);
-			return result.IsSuccess ? Ok(result.Value) : result.ToProblem(StatusCodes.Status404NotFound);
+
+			return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 		}
 
 		[HttpPost]
@@ -43,9 +39,7 @@ namespace SurveyBasket.API.Controllers
 			if (result.IsSuccess)
 				return CreatedAtAction(nameof(Get), new { pollId, result.Value.Id }, result.Value);
 
-			return result.Error.Equals(QuestionErrors.DuplicatedQuestionContent)
-				? result.ToProblem(StatusCodes.Status409Conflict)
-				: result.ToProblem(StatusCodes.Status404NotFound);
+			return result.ToProblem();
 		}
 
 		[HttpPut("{id}")]
@@ -53,19 +47,14 @@ namespace SurveyBasket.API.Controllers
 		{
 			var result = await _questionService.UpdateAsync(pollId, id, request);
 
-			if (result.IsSuccess)
-				return NoContent();
-
-			return result.Error.Equals(QuestionErrors.DuplicatedQuestionContent)
-				? result.ToProblem(StatusCodes.Status409Conflict)
-				: result.ToProblem(StatusCodes.Status404NotFound);
+			return result.IsSuccess ? NoContent() : result.ToProblem();
 		}
 
 		[HttpPut("{id}/ToggleStatus")]
 		public async Task<IActionResult> ToggleStatus([FromRoute] int pollId, int id)
 		{
 			var result = await _questionService.ToggleStatusAsync(pollId, id);
-			return result.IsSuccess ? NoContent() : result.ToProblem(StatusCodes.Status404NotFound);
+			return result.IsSuccess ? NoContent() : result.ToProblem();
 		}
 	}
 }

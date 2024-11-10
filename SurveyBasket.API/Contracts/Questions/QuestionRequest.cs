@@ -1,7 +1,8 @@
 ﻿namespace SurveyBasket.API.Contracts.Questions
 {
-	public record QuestionRequest(
-		string Content,
-		List<string> Answers
-	);
+	public class QuestionRequest
+	{
+		public string Content { get; set; } = string.Empty;
+		public List<string> Answers { get; set; } = [];
+	}
 }

@@ -1,11 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SurveyBasket.API.Contracts.Polls
+﻿namespace SurveyBasket.API.Contracts.Polls
 {
-    public record PollRequest(
-        string Title,
-        string Summary,
-        DateOnly StartsAt,
-        DateOnly EndsAt
-    );
+	public class PollRequest
+	{
+		public string Title { get; set; } = string.Empty;
+		public string Summary { get; set; } = string.Empty;
+		public DateOnly StartsAt { get; set; }
+		public DateOnly EndsAt { get; set; }
+	}
 }

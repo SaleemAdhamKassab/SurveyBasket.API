@@ -19,7 +19,7 @@ namespace SurveyBasket.API.Controllers
 		public async Task<IActionResult> Get(int id)
 		{
 			var result = await _pollService.GetAsync(id);
-			return result.IsSuccess ? Ok(result.Value) : result.ToProblem(StatusCodes.Status400BadRequest);
+			return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 		}
 
 		[HttpGet]
@@ -29,35 +29,39 @@ namespace SurveyBasket.API.Controllers
 			return Ok(result);
 		}
 
+		[HttpGet("current")]
+		public async Task<IActionResult> Current()
+		{
+			var result = await _pollService.GetCurrentAsync();
+			return Ok(result);
+		}
+
 		[HttpPost]
 		public async Task<IActionResult> Add(PollRequest request)
 		{
 			var result = await _pollService.AddAsync(request);
-			return result.IsSuccess ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value) : result.ToProblem(StatusCodes.Status409Conflict);
+			return result.IsSuccess ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value) : result.ToProblem();
 		}
 
 		[HttpPut("{id}")]
 		public async Task<IActionResult> Update(int id, PollRequest request)
 		{
 			var result = await _pollService.UpdateAsync(id, request);
-			return result.IsSuccess ? NoContent()
-				: result.Error.Code == PollErrors.PollNotFound.Code
-					? result.ToProblem(StatusCodes.Status404NotFound)
-					: result.ToProblem(StatusCodes.Status409Conflict);
+			return result.IsSuccess ? NoContent() : result.ToProblem();
 		}
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> Delete(int id)
 		{
 			var result = await _pollService.DeleteAsync(id);
-			return result.IsSuccess ? NoContent() : result.ToProblem(StatusCodes.Status404NotFound);
+			return result.IsSuccess ? NoContent() : result.ToProblem();
 		}
 
 		[HttpPut("{id}/TogglePublish")]
 		public async Task<IActionResult> TogglePublish(int id)
 		{
 			var result = await _pollService.TogglePublishStatusAsync(id);
-			return result.IsSuccess ? NoContent() : result.ToProblem(StatusCodes.Status404NotFound);
+			return result.IsSuccess ? NoContent() : result.ToProblem();
 		}
 	}
 }

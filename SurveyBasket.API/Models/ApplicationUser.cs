@@ -6,6 +6,7 @@ namespace SurveyBasket.API.Models
 	{
 		public string FirstName { get; set; } = string.Empty;
 		public string LastName { get; set; } = string.Empty;
-		public List<RefreshToken> RefreshTokens { get; set; } = [];
+		public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
+		public ICollection<Vote> Votes { get; set; } = [];
 	}
 }

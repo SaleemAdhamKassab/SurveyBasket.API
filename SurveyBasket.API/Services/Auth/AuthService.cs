@@ -48,7 +48,18 @@ namespace SurveyBasket.API.Services.Auth
 			});
 			await _userManager.UpdateAsync(user);
 
-			AuthResponse authResponse = new(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
+			var authResponse = new AuthResponse
+			{
+				Id = user.Id,
+				Email = user.Email,
+				FirstName = user.FirstName,
+				LastName = user.LastName,
+				Token = token,
+				ExpiresIn = expiresIn,
+				RefreshToken = refreshToken,
+				RefreshTokenExpiration = refreshTokenExpiration
+			};
+
 			return Result.Success(authResponse);
 		}
 
@@ -86,7 +97,17 @@ namespace SurveyBasket.API.Services.Auth
 
 			await _userManager.UpdateAsync(user);
 
-			AuthResponse response = new(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn, newRefreshToken, refreshTokenExpiration);
+			var response = new AuthResponse
+			{
+				Id = user.Id,
+				Email = user.Email,
+				FirstName = user.FirstName,
+				LastName = user.LastName,
+				Token = newToken,
+				ExpiresIn = expiresIn,
+				RefreshToken = newRefreshToken,
+				RefreshTokenExpiration = refreshTokenExpiration
+			};
 
 			return Result.Success(response);
 		}

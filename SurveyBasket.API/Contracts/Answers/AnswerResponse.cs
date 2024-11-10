@@ -1,7 +1,8 @@
 ﻿namespace SurveyBasket.API.Contracts.Answers
 {
-	public record AnswerResponse(
-		int Id,
-		string Content
-	);
+	public class AnswerResponse
+	{
+		public int Id { get; set; }
+		public string Content { get; set; } = string.Empty;
+	}
 }
