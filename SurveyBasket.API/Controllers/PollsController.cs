@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SurveyBasket.API.Abstractions;
-using SurveyBasket.API.Contracts.Polls;
+using SurveyBasket.API.Abstractions.ApiResult;
+using SurveyBasket.API.Contracts.Polls.Requests;
 using SurveyBasket.API.Errors;
-using SurveyBasket.API.Services;
+using SurveyBasket.API.Services.PollsService;
 
 namespace SurveyBasket.API.Controllers
 {

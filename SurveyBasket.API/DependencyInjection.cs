@@ -2,17 +2,22 @@
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using SurveyBasket.API.Data;
 using SurveyBasket.API.Models;
-using SurveyBasket.API.Services;
 using SurveyBasket.API.Services.Auth;
 using System.Reflection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using SurveyBasket.API.Contracts.Auth;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using SurveyBasket.API.Errors;
+using SurveyBasket.API.Services.DashboardsService;
+using SurveyBasket.API.Services.PollsService;
+using SurveyBasket.API.Services.QuestionsService;
+using SurveyBasket.API.Services.VotesService;
+using SurveyBasket.API.Models.Data;
+using SurveyBasket.API.Settings;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using SurveyBasket.API.Services.EmailService;
 
 namespace SurveyBasket.API
 {
@@ -21,7 +26,6 @@ namespace SurveyBasket.API
 		public static IServiceCollection AddDependecies(this IServiceCollection services, IConfiguration configuration)
 		{
 			services.AddControllers();
-
 			services.AddCors(options => options.AddDefaultPolicy(builder => builder
 					.AllowAnyMethod()
 					.AllowAnyHeader()
@@ -29,19 +33,19 @@ namespace SurveyBasket.API
 			);
 
 			services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-
 			services
 				.AddSwaggerConfig()
 				.AddFluentValidationConfig()
 				.AddAuthConfig(configuration);
-
 			services.AddScoped<IPollService, PollService>();
 			services.AddScoped<IQuestionService, QuestionService>();
 			services.AddScoped<IVoteService, VoteService>();
 			services.AddScoped<IDashboardService, DashboardService>();
-
+			services.AddScoped<IEmailSender, EmailSender>();
 			services.AddExceptionHandler<GlobalExceptionHandler>();
 			services.AddProblemDetails();
+			services.Configure<MailOptions>(configuration.GetSection(nameof(MailOptions)));
+			services.AddHttpContextAccessor();
 
 			return services;
 		}
@@ -89,7 +93,10 @@ namespace SurveyBasket.API
 		private static IServiceCollection AddAuthConfig(this IServiceCollection services, IConfiguration configuration)
 		{
 			services.AddScoped<IAuthService, AuthService>();
-			services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
+
+			services.AddIdentity<ApplicationUser, IdentityRole>()
+				.AddEntityFrameworkStores<ApplicationDbContext>()
+				.AddDefaultTokenProviders();
 
 			//JWT
 			services.AddSingleton<IJwtProvider, JwtProvider>();
@@ -118,6 +125,13 @@ namespace SurveyBasket.API
 					ValidIssuer = jwtSettings?.Issuer,
 					ValidAudience = jwtSettings?.Audience
 				};
+			});
+
+			services.Configure<IdentityOptions>(options =>
+			{
+				options.Password.RequiredLength = 6;
+				options.SignIn.RequireConfirmedEmail = true;
+				options.User.RequireUniqueEmail = true;
 			});
 
 			return services;

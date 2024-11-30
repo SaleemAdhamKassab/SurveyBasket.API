@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SurveyBasket.API.Data;
+using SurveyBasket.API.Models.Data;
 
 #nullable disable
 
 namespace SurveyBasket.API.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+	[DbContext(typeof(ApplicationDbContext))]
     [Migration("20241016214528_AddIdentityTables")]
     partial class AddIdentityTables
     {

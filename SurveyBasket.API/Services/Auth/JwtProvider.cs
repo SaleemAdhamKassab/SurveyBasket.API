@@ -1,19 +1,13 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using SurveyBasket.API.Contracts.Auth;
 using SurveyBasket.API.Models;
+using SurveyBasket.API.Settings;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace SurveyBasket.API.Services.Auth
 {
-	public interface IJwtProvider
-	{
-		(string token, int expiresIn) GenerationToken(ApplicationUser user);
-		string? ValidateToken(string token); // return UserId if valid
-	}
-
 	public class JwtProvider(IOptions<JwtOptions> jwtOptions) : IJwtProvider
 	{
 		private readonly JwtOptions _jwtOptions = jwtOptions.Value;

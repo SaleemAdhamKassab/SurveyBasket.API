@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SurveyBasket.API.Data;
+using SurveyBasket.API.Models.Data;
 
 #nullable disable
 
 namespace SurveyBasket.API.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+	[DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
