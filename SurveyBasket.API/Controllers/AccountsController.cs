@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SurveyBasket.API.Abstractions.ApiResult;
 using SurveyBasket.API.Contracts.Users.Requests;
 using SurveyBasket.API.Extensions;
 using SurveyBasket.API.Services.UsersService;
@@ -28,6 +29,15 @@ namespace SurveyBasket.API.Controllers
 			var result = await _userService.UpdateProfileAsync(User.GetUserId()!, request);
 
 			return Ok();
+		}
+
+
+		[HttpPut("changePassword")]
+		public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
+		{
+			var result = await _userService.ChangePasswordAsync(User.GetUserId()!, request);
+
+			return result.IsSuccess ? Ok() : result.ToProblem();
 		}
 	}
 }
