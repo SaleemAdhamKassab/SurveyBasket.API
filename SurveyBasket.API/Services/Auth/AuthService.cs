@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -77,8 +78,12 @@ namespace SurveyBasket.API.Services.Auth
 			};
 
 			var emailBody = EmailBodyBuilder.GenerateEmailBody("EmailConfirmation", emailTemplateModel);
-			await _emailSender.SendEmailAsync(user.Email, "Survey Basket: Email Confirmation", emailBody);
 
+			//await _emailSender.SendEmailAsync(user.Email, "Survey Basket: Email Confirmation", emailBody);
+			BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email,
+																	"Survey Basket: Email Confirmation",
+																	emailBody));
+			await Task.CompletedTask;
 		}
 
 
@@ -138,6 +143,7 @@ namespace SurveyBasket.API.Services.Auth
 			var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 			token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 			await sendConfirmationEmail(user, token);
+
 			return Result.Success();
 		}
 		public async Task<Result<AuthResponse>> GetRefreshTokenAsync(string token, string refreshToken)

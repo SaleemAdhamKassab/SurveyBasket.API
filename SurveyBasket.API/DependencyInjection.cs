@@ -18,6 +18,8 @@ using SurveyBasket.API.Models.Data;
 using SurveyBasket.API.Settings;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using SurveyBasket.API.Services.EmailService;
+using Hangfire;
+using Microsoft.Extensions.Configuration;
 
 namespace SurveyBasket.API
 {
@@ -42,10 +44,12 @@ namespace SurveyBasket.API
 			services.AddScoped<IVoteService, VoteService>();
 			services.AddScoped<IDashboardService, DashboardService>();
 			services.AddScoped<IEmailSender, EmailSender>();
+
 			services.AddExceptionHandler<GlobalExceptionHandler>();
 			services.AddProblemDetails();
 			services.Configure<MailOptions>(configuration.GetSection(nameof(MailOptions)));
 			services.AddHttpContextAccessor();
+			services.AddHangfireConfig(configuration);
 
 			return services;
 		}
@@ -133,6 +137,20 @@ namespace SurveyBasket.API
 				options.SignIn.RequireConfirmedEmail = true;
 				options.User.RequireUniqueEmail = true;
 			});
+
+			return services;
+		}
+
+		private static IServiceCollection AddHangfireConfig(this IServiceCollection services, IConfiguration configuration)
+		{
+			services.AddHangfire(config => config
+				.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+				.UseSimpleAssemblyNameTypeSerializer()
+				.UseRecommendedSerializerSettings()
+				.UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection"))
+			);
+
+			services.AddHangfireServer();
 
 			return services;
 		}
