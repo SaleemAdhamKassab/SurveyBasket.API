@@ -273,6 +273,9 @@ namespace SurveyBasket.API.Services.Auth
 			if (user is null)
 				return Result.Success(); // hacker misleading
 
+			if (!user.EmailConfirmed)
+				return Result.Failure(UserErrors.EmailNotConfirmed);
+
 			//generate forget password html template
 			var token = await _userManager.GeneratePasswordResetTokenAsync(user!);
 			token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));

@@ -30,12 +30,19 @@ namespace SurveyBasket.API.Services.UsersService
 		}
 		public async Task<Result> UpdateProfileAsync(string userId, UpdateProfileRequest request)
 		{
-			var user = await _userManager.FindByIdAsync(userId);
+			//var user = await _userManager.FindByIdAsync(userId);
 
-			user.FirstName = request.FirstName;
-			user.LastName = request.LastName;
+			//user!.FirstName = request.FirstName;
+			//user!.LastName = request.LastName;
 
-			await _userManager.UpdateAsync(user);
+			//await _userManager.UpdateAsync(user);
+
+			await _userManager.Users
+				.Where(e => e.Id == userId)
+				.ExecuteUpdateAsync(prop => prop
+									.SetProperty(e => e.FirstName, request.FirstName)
+									.SetProperty(e => e.LastName, request.LastName));
+
 			return Result.Success();
 		}
 		public async Task<Result> ChangePasswordAsync(string userId, ChangePasswordRequest request)
