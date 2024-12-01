@@ -295,6 +295,34 @@ namespace SurveyBasket.API.Services.Auth
 
 			return Result.Success();
 		}
+
+		public async Task<Result> ResetPasswordAsync(ResetPasswordRequest request)
+		{
+			var user = await _userManager.FindByEmailAsync(request.Email);
+
+			if (user is null || !user.EmailConfirmed)
+				return Result.Failure(UserErrors.InvalidToken);
+
+			IdentityResult result;
+
+			try
+			{
+				var token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
+				result = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
+			}
+			catch (FormatException)
+			{
+				result = IdentityResult.Failed(_userManager.ErrorDescriber.InvalidToken());
+			}
+
+			if (!result.Succeeded)
+			{
+				var error = result.Errors.First();
+				return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status401Unauthorized));
+			}
+
+			return Result.Success();
+		}
 	}
 }
 

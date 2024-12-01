@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using SurveyBasket.API.Contracts.Users.Requests;
 
-namespace SurveyBasket.API.Contracts.Questions.Validators
+namespace SurveyBasket.API.Contracts.Auth.Validators
 {
 	public class ForgetPasswordRequestValidator : AbstractValidator<ForgetPasswordRequest>
 	{

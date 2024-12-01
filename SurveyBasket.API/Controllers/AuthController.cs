@@ -68,5 +68,14 @@ namespace SurveyBasket.API.Controllers
 
 			return result.IsSuccess ? Ok() : result.ToProblem();
 		}
+
+
+		[HttpPost("resetPassword")]
+		public async Task<IActionResult> resetPassword(ResetPasswordRequest request)
+		{
+			var result = await _authService.ResetPasswordAsync(request);
+
+			return result.IsSuccess ? Ok() : result.ToProblem();
+		}
 	}
 }
