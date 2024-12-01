@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using SurveyBasket.API.Services.EmailService;
 using Hangfire;
 using SurveyBasket.API.Services.PollsNotificationService;
+using SurveyBasket.API.Services.UsersService;
 
 namespace SurveyBasket.API
 {
@@ -43,6 +44,7 @@ namespace SurveyBasket.API
 			services.AddScoped<IQuestionService, QuestionService>();
 			services.AddScoped<IVoteService, VoteService>();
 			services.AddScoped<IDashboardService, DashboardService>();
+			services.AddScoped<IUserService, UserService>();
 			services.AddScoped<IEmailSender, EmailSender>();
 			services.AddScoped<IPollsNotificationService, PollsNotificationService>();
 
