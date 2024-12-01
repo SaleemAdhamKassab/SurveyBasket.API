@@ -266,6 +266,35 @@ namespace SurveyBasket.API.Services.Auth
 
 			return Result.Success();
 		}
+		public async Task<Result> SendResetPasswordTokenAsync(string email)
+		{
+			var user = await _userManager.FindByEmailAsync(email);
+
+			if (user is null)
+				return Result.Success(); // hacker misleading
+
+			//generate forget password html template
+			var token = await _userManager.GeneratePasswordResetTokenAsync(user!);
+			token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+			var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
+
+			var forgetPasswordTemplateModel = new Dictionary<string, string>
+			{
+				{
+					"{{name}}",user.FirstName
+				},
+				{
+					"{{action_url}}", $"{origin}/me/forgetPasssowrd?email={user.Email}&token = {token}"
+				}
+			};
+
+			var htmlMessage = EmailBodyBuilder.GenerateEmailBody("ForgetPassword", forgetPasswordTemplateModel);
+
+			BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email, "Survey Basket: Change Password", htmlMessage));
+			await Task.CompletedTask;
+
+			return Result.Success();
+		}
 	}
 }
 

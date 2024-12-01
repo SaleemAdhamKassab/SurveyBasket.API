@@ -12,5 +12,6 @@ namespace SurveyBasket.API.Services.Auth
 		Task<Result> RevokeRefreshTokenAsync(string token, string refreshToken);
 		Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request);
 		Task<Result> ResendConfirmationEmail(ResendConfirmationEmailRequest request);
+		Task<Result> SendResetPasswordTokenAsync(string email);
 	}
 }
