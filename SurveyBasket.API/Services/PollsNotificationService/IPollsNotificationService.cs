@@ -2,5 +2,6 @@
 {
 	public interface IPollsNotificationService
 	{
+		Task SendNewPollsNotification();
 	}
 }

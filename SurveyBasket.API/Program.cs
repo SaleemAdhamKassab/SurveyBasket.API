@@ -2,6 +2,7 @@ using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Serilog;
 using SurveyBasket.API;
+using SurveyBasket.API.Services.PollsNotificationService;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependecies(builder.Configuration);
@@ -28,6 +29,16 @@ app.UseHangfireDashboard("/HangfireJobs", new DashboardOptions
 		}
 	]
 });
+
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+using var scope = scopeFactory.CreateScope();
+var pollsNotificationService = scope.ServiceProvider.GetRequiredService<IPollsNotificationService>();
+
+RecurringJob.AddOrUpdate("SendNewPollsNotification",
+						 () => pollsNotificationService.SendNewPollsNotification(),
+						 Cron.Daily
+);
+
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();

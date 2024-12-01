@@ -19,7 +19,7 @@ using SurveyBasket.API.Settings;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using SurveyBasket.API.Services.EmailService;
 using Hangfire;
-using Microsoft.Extensions.Configuration;
+using SurveyBasket.API.Services.PollsNotificationService;
 
 namespace SurveyBasket.API
 {
@@ -44,6 +44,7 @@ namespace SurveyBasket.API
 			services.AddScoped<IVoteService, VoteService>();
 			services.AddScoped<IDashboardService, DashboardService>();
 			services.AddScoped<IEmailSender, EmailSender>();
+			services.AddScoped<IPollsNotificationService, PollsNotificationService>();
 
 			services.AddExceptionHandler<GlobalExceptionHandler>();
 			services.AddProblemDetails();
