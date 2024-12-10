@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using SurveyBasket.API.Abstractions.ApiResult;
+using SurveyBasket.API.Abstractions.Consts;
 using SurveyBasket.API.Abstractions.Result.ApiResult;
 using SurveyBasket.API.Contracts.Auth.Requests;
 using SurveyBasket.API.Contracts.Auth.Responses;
 using SurveyBasket.API.Errors;
 using SurveyBasket.API.Helpers;
 using SurveyBasket.API.Models;
+using SurveyBasket.API.Models.Data;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -20,21 +22,44 @@ namespace SurveyBasket.API.Services.Auth
 		SignInManager<ApplicationUser> signInManager,
 		IJwtProvider jwtProvider,
 		IEmailSender emailSender,
-		IHttpContextAccessor httpContextAccessor) : IAuthService
+		IHttpContextAccessor httpContextAccessor,
+		ApplicationDbContext db) : IAuthService
 	{
 		private readonly UserManager<ApplicationUser> _userManager = userManager;
 		private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
 		private readonly IJwtProvider _jwtProvider = jwtProvider;
 		private readonly IEmailSender _emailSender = emailSender;
 		private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+		private readonly ApplicationDbContext _db = db;
 
 		private readonly int _refreshTokenExpireDays = 14;
 
 
 		private string genereateRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+		private async Task<(IEnumerable<string> roles, IEnumerable<string> permissions)> getUserRolesAndPermissions(ApplicationUser user)
+		{
+			var userRoles = await _userManager.GetRolesAsync(user);
+
+			var userPermissions = await _db.Roles.Join(
+				_db.RoleClaims,
+				role => role.Id,
+				claim => claim.RoleId,
+				(role, claim) => new
+				{
+					role,
+					claim
+				})
+				.Where(e => userRoles.Contains(e.role.Name!))
+				.Select(e => e.claim.ClaimValue)
+				.Distinct()
+				.ToListAsync();
+
+			return new(userRoles, userPermissions!);
+		}
 		private async Task<AuthResponse> getAuthResponse(ApplicationUser user)
 		{
-			var (token, expiresIn) = _jwtProvider.GenerationToken(user);
+			var (userRoles, userPermissions) = await getUserRolesAndPermissions(user);
+			var (token, expiresIn) = _jwtProvider.GenerationToken(user, userRoles, userPermissions);
 
 			var refreshToken = genereateRefreshToken();
 			var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpireDays);
@@ -144,6 +169,8 @@ namespace SurveyBasket.API.Services.Auth
 			token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 			await sendConfirmationEmail(user, token);
 
+			await _userManager.AddToRoleAsync(user, DefaultRoles.Member);
+
 			return Result.Success();
 		}
 		public async Task<Result<AuthResponse>> GetRefreshTokenAsync(string token, string refreshToken)
@@ -165,7 +192,8 @@ namespace SurveyBasket.API.Services.Auth
 
 			userRefreshToken.RevokedOn = DateTime.UtcNow;
 
-			var (newToken, expiresIn) = _jwtProvider.GenerationToken(user);
+			var (userRoles, userPermissions) = await getUserRolesAndPermissions(user);
+			var (newToken, expiresIn) = _jwtProvider.GenerationToken(user, userRoles, userPermissions);
 
 			var newRefreshToken = genereateRefreshToken();
 			var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpireDays);
@@ -249,7 +277,6 @@ namespace SurveyBasket.API.Services.Auth
 
 			return Result.Success();
 		}
-
 		public async Task<Result> ResendConfirmationEmail(ResendConfirmationEmailRequest request)
 		{
 			var user = await _userManager.FindByEmailAsync(request.Email);
@@ -298,7 +325,6 @@ namespace SurveyBasket.API.Services.Auth
 
 			return Result.Success();
 		}
-
 		public async Task<Result> ResetPasswordAsync(ResetPasswordRequest request)
 		{
 			var user = await _userManager.FindByEmailAsync(request.Email);

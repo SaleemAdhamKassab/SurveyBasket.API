@@ -5,6 +5,7 @@ using SurveyBasket.API.Settings;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 namespace SurveyBasket.API.Services.Auth
 {
@@ -12,7 +13,7 @@ namespace SurveyBasket.API.Services.Auth
 	{
 		private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
-		public (string token, int expiresIn) GenerationToken(ApplicationUser user)
+		public (string token, int expiresIn) GenerationToken(ApplicationUser user, IEnumerable<string> roles, IEnumerable<string> permissions)
 		{
 			Claim[] claims = [
 				new (JwtRegisteredClaimNames.Sub,user.Id),
@@ -20,6 +21,8 @@ namespace SurveyBasket.API.Services.Auth
 				new (JwtRegisteredClaimNames.GivenName,user.FirstName),
 				new (JwtRegisteredClaimNames.FamilyName,user.LastName),
 				new (JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+				new (nameof(roles),JsonSerializer.Serialize(roles),JsonClaimValueTypes.JsonArray),
+				new (nameof(permissions),JsonSerializer.Serialize(permissions),JsonClaimValueTypes.JsonArray)
 			];
 
 			var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
