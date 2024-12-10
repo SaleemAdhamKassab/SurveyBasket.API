@@ -1,16 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SurveyBasket.API.Abstractions;
 using SurveyBasket.API.Abstractions.ApiResult;
+using SurveyBasket.API.Abstractions.Consts;
 using SurveyBasket.API.Contracts.Polls.Requests;
-using SurveyBasket.API.Errors;
 using SurveyBasket.API.Services.PollsService;
 
 namespace SurveyBasket.API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	[Authorize]
+
 	public class PollsController(IPollService pollService) : ControllerBase
 	{
 		private readonly IPollService _pollService = pollService;
@@ -30,7 +29,9 @@ namespace SurveyBasket.API.Controllers
 			return Ok(result);
 		}
 
+
 		[HttpGet("current")]
+		[Authorize(Roles = DefaultRoles.Member)]
 		public async Task<IActionResult> Current()
 		{
 			var result = await _pollService.GetCurrentAsync();
