@@ -21,8 +21,8 @@ namespace SurveyBasket.API.Services.UsersService
 				{
 					FirstName = e.FirstName,
 					LastName = e.LastName,
-					Email = e.Email,
-					UserName = e.UserName
+					Email = e.Email!,
+					UserName = e.UserName!
 				})
 				.SingleAsync();
 

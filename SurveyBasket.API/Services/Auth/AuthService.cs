@@ -80,7 +80,7 @@ namespace SurveyBasket.API.Services.Auth
 			var emailBody = EmailBodyBuilder.GenerateEmailBody("EmailConfirmation", emailTemplateModel);
 
 			//await _emailSender.SendEmailAsync(user.Email, "Survey Basket: Email Confirmation", emailBody);
-			BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email,
+			BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!,
 																	"Survey Basket: Email Confirmation",
 																	emailBody));
 			await Task.CompletedTask;
@@ -293,7 +293,7 @@ namespace SurveyBasket.API.Services.Auth
 
 			var htmlMessage = EmailBodyBuilder.GenerateEmailBody("ForgetPassword", forgetPasswordTemplateModel);
 
-			BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email, "Survey Basket: Change Password", htmlMessage));
+			BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "Survey Basket: Change Password", htmlMessage));
 			await Task.CompletedTask;
 
 			return Result.Success();

@@ -54,7 +54,7 @@ namespace SurveyBasket.API.Services.PollsNotificationService
 
 					var emailBody = EmailBodyBuilder.GenerateEmailBody("PollNotification", pollNotificationTemplateModel);
 
-					await _emailSender.SendEmailAsync(user.Email,
+					await _emailSender.SendEmailAsync(user.Email!,
 													 $"Survey Basket: New Poll - {poll.Title}",
 													 emailBody);
 				}

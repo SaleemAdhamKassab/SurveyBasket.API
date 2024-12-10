@@ -1,24 +1,23 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using SurveyBasket.API.Extensions;
-using SurveyBasket.API.Models;
 using System.Reflection;
-using System.Security.Claims;
 
 namespace SurveyBasket.API.Models.Data
 {
 	public class ApplicationDbContext(
 		DbContextOptions<ApplicationDbContext> options,
-		IHttpContextAccessor httpContextAccessor) : IdentityDbContext<ApplicationUser>(options)
+		IHttpContextAccessor httpContextAccessor) : IdentityDbContext<ApplicationUser, ApplicationRole, string>(options)
 	{
 		private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-		public DbSet<Poll> Polls { get; set; }
-		public DbSet<Question> Questions { get; set; }
-		public DbSet<Answer> Answers { get; set; }
-		public DbSet<Vote> Votes { get; set; }
-		public DbSet<VoteAnswer> VoteAnswers { get; set; }
-		public DbSet<RefreshToken> RefreshTokens { get; set; }
+		public DbSet<Poll> Polls { get; set; } = default!;
+		public DbSet<Question> Questions { get; set; } = default!;
+		public DbSet<Answer> Answers { get; set; } = default!;
+		public DbSet<Vote> Votes { get; set; } = default!;
+		public DbSet<VoteAnswer> VoteAnswers { get; set; } = default!;
+		public DbSet<RefreshToken> RefreshTokens { get; set; } = default!;
 
 
 
@@ -54,6 +53,14 @@ namespace SurveyBasket.API.Models.Data
 			}
 
 			return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+		}
+
+
+		// To Handle the error: PendingModelChangesWarning Not Recommended
+		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		{
+			optionsBuilder.ConfigureWarnings(warnings =>
+				warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
 		}
 	}
 }

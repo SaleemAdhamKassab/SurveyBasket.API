@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SurveyBasket.API.Abstractions.Consts;
 
 namespace SurveyBasket.API.Models.ModelsConfigurations
 {
@@ -14,6 +16,26 @@ namespace SurveyBasket.API.Models.ModelsConfigurations
 				.ToTable("RefreshTokens")
 				.WithOwner()
 				.HasForeignKey("UserId");
+
+
+			//Default Admin
+
+			var passwordHasher = new PasswordHasher<ApplicationUser>();
+
+			builder.HasData(new ApplicationUser
+			{
+				Id = DefaultUsers.AdminId,
+				FirstName = "Survey Basket",
+				LastName = "Admin",
+				UserName = DefaultUsers.AdminEmail,
+				NormalizedUserName = DefaultUsers.AdminEmail.ToUpper(),
+				Email = DefaultUsers.AdminEmail,
+				NormalizedEmail = DefaultUsers.AdminEmail.ToUpper(),
+				SecurityStamp = DefaultUsers.AdminSecurityStamp,
+				ConcurrencyStamp = DefaultUsers.AdminConcurrencyStamp,
+				EmailConfirmed = true,
+				PasswordHash = passwordHasher.HashPassword(null!, DefaultUsers.AdminPassword)
+			});
 		}
 	}
 }

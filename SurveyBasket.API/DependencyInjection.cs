@@ -101,7 +101,7 @@ namespace SurveyBasket.API
 		{
 			services.AddScoped<IAuthService, AuthService>();
 
-			services.AddIdentity<ApplicationUser, IdentityRole>()
+			services.AddIdentity<ApplicationUser, ApplicationRole>()
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders();
 
