@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SurveyBasket.API.Abstractions.ApiResult;
 using SurveyBasket.API.Abstractions.Consts;
+using SurveyBasket.API.Contracts.Auth.Filters;
 using SurveyBasket.API.Contracts.Polls.Requests;
 using SurveyBasket.API.Services.PollsService;
 
@@ -23,6 +24,7 @@ namespace SurveyBasket.API.Controllers
 		}
 
 		[HttpGet]
+		[HasPermission(Permissions.GetPolls)]
 		public async Task<IActionResult> GetAll()
 		{
 			var result = await _pollService.GetAllAsync();
@@ -39,6 +41,7 @@ namespace SurveyBasket.API.Controllers
 		}
 
 		[HttpPost]
+		[HasPermission(Permissions.AddPolls)]
 		public async Task<IActionResult> Add(PollRequest request)
 		{
 			var result = await _pollService.AddAsync(request);
@@ -46,6 +49,7 @@ namespace SurveyBasket.API.Controllers
 		}
 
 		[HttpPut("{id}")]
+		[HasPermission(Permissions.UpdatePolls)]
 		public async Task<IActionResult> Update(int id, PollRequest request)
 		{
 			var result = await _pollService.UpdateAsync(id, request);
@@ -53,6 +57,7 @@ namespace SurveyBasket.API.Controllers
 		}
 
 		[HttpDelete("{id}")]
+		[HasPermission(Permissions.DeletePolls)]
 		public async Task<IActionResult> Delete(int id)
 		{
 			var result = await _pollService.DeleteAsync(id);
@@ -60,6 +65,7 @@ namespace SurveyBasket.API.Controllers
 		}
 
 		[HttpPut("{id}/TogglePublish")]
+		[HasPermission(Permissions.UpdatePolls)]
 		public async Task<IActionResult> TogglePublish(int id)
 		{
 			var result = await _pollService.TogglePublishStatusAsync(id);

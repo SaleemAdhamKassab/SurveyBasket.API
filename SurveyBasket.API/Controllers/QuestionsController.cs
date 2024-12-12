@@ -1,22 +1,21 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using SurveyBasket.API.Abstractions;
+﻿using Microsoft.AspNetCore.Mvc;
 using SurveyBasket.API.Abstractions.ApiResult;
+using SurveyBasket.API.Abstractions.Consts;
+using SurveyBasket.API.Contracts.Auth.Filters;
 using SurveyBasket.API.Contracts.Questions.Requests;
-using SurveyBasket.API.Errors;
 using SurveyBasket.API.Services.QuestionsService;
 
 namespace SurveyBasket.API.Controllers
 {
 	[Route("api/polls/{pollId}/[controller]")]
 	[ApiController]
-	[Authorize]
 
 	public class QuestionsController(IQuestionService questionService) : ControllerBase
 	{
 		private readonly IQuestionService _questionService = questionService;
 
 		[HttpGet]
+		[HasPermission(Permissions.GetQuestions)]
 		public async Task<IActionResult> GetAll([FromRoute] int pollId)
 		{
 			var result = await _questionService.GetAllAsync(pollId);
@@ -25,6 +24,7 @@ namespace SurveyBasket.API.Controllers
 		}
 
 		[HttpGet("{id}")]
+		[HasPermission(Permissions.GetQuestions)]
 		public async Task<IActionResult> Get([FromRoute] int pollId, int id)
 		{
 			var result = await _questionService.GetAsync(pollId, id);
@@ -33,6 +33,7 @@ namespace SurveyBasket.API.Controllers
 		}
 
 		[HttpPost]
+		[HasPermission(Permissions.AddQuestions)]
 		public async Task<IActionResult> Add([FromRoute] int pollId, [FromBody] QuestionRequest request)
 		{
 			var result = await _questionService.AddAsync(pollId, request);
@@ -44,6 +45,7 @@ namespace SurveyBasket.API.Controllers
 		}
 
 		[HttpPut("{id}")]
+		[HasPermission(Permissions.UpdateQuestions)]
 		public async Task<IActionResult> Update([FromRoute] int pollId, int id, [FromBody] QuestionRequest request)
 		{
 			var result = await _questionService.UpdateAsync(pollId, id, request);
@@ -52,6 +54,7 @@ namespace SurveyBasket.API.Controllers
 		}
 
 		[HttpPut("{id}/ToggleStatus")]
+		[HasPermission(Permissions.UpdateQuestions)]
 		public async Task<IActionResult> ToggleStatus([FromRoute] int pollId, int id)
 		{
 			var result = await _questionService.ToggleStatusAsync(pollId, id);

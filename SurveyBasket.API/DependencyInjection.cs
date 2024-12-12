@@ -21,6 +21,8 @@ using SurveyBasket.API.Services.EmailService;
 using Hangfire;
 using SurveyBasket.API.Services.PollsNotificationService;
 using SurveyBasket.API.Services.UsersService;
+using Microsoft.AspNetCore.Authorization;
+using SurveyBasket.API.Contracts.Auth.Filters;
 
 namespace SurveyBasket.API
 {
@@ -104,6 +106,9 @@ namespace SurveyBasket.API
 			services.AddIdentity<ApplicationUser, ApplicationRole>()
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders();
+
+			services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+			services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
 			//JWT
 			services.AddSingleton<IJwtProvider, JwtProvider>();

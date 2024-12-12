@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SurveyBasket.API.Abstractions;
 using SurveyBasket.API.Abstractions.ApiResult;
+using SurveyBasket.API.Abstractions.Consts;
+using SurveyBasket.API.Contracts.Auth.Filters;
 using SurveyBasket.API.Services.DashboardsService;
 
 namespace SurveyBasket.API.Controllers
 {
 	[Route("api/polls/{pollId}/[controller]")]
 	[ApiController]
-	[Authorize]
+	[HasPermission(Permissions.Results)]
 	public class DashboardController(IDashboardService dashboardService) : ControllerBase
 	{
 
