@@ -23,6 +23,7 @@ using SurveyBasket.API.Services.PollsNotificationService;
 using SurveyBasket.API.Services.UsersService;
 using Microsoft.AspNetCore.Authorization;
 using SurveyBasket.API.Contracts.Auth.Filters;
+using SurveyBasket.API.Services.RolesService;
 
 namespace SurveyBasket.API
 {
@@ -49,6 +50,7 @@ namespace SurveyBasket.API
 			services.AddScoped<IUserService, UserService>();
 			services.AddScoped<IEmailSender, EmailSender>();
 			services.AddScoped<IPollsNotificationService, PollsNotificationService>();
+			services.AddScoped<IRoleService, RoleService>();
 
 			services.AddExceptionHandler<GlobalExceptionHandler>();
 			services.AddProblemDetails();
