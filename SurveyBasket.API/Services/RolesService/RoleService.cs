@@ -146,6 +146,16 @@ namespace SurveyBasket.API.Services.RolesService
 
 			return Result.Success();
 		}
+		public async Task<Result> ToggleStatusAsync(string id)
+		{
+			if (await _roleManager.FindByIdAsync(id) is not { } role)
+				return Result.Failure<RoleDetailResponse>(RoleErrors.RoleNotFound);
+			
+			role.IsDeleted = !role.IsDeleted;
+			await _roleManager.UpdateAsync(role);
+
+			return Result.Success();
+		}
 	}
 }
 

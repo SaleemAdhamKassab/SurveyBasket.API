@@ -50,5 +50,14 @@ namespace SurveyBasket.API.Controllers
 
 			return result.IsSuccess ? NoContent() : result.ToProblem();
 		}
+
+		[HttpPut("{id}/toggleStatus")]
+		[HasPermission(Permissions.UpdateRoles)]
+		public async Task<IActionResult> ToggleStatus([FromRoute] string id)
+		{
+			var result = await _roleService.ToggleStatusAsync(id);
+
+			return result.IsSuccess ? NoContent() : result.ToProblem();
+		}
 	}
 }

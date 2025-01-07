@@ -10,5 +10,6 @@ namespace SurveyBasket.API.Services.RolesService
 		Task<Result<RoleDetailResponse>> GetAsync(string Id);
 		Task<Result<RoleDetailResponse>> AddAsync(CreateRoleRequest request);
 		Task<Result> UpdateAsync(string id, CreateRoleRequest request);
+		Task<Result> ToggleStatusAsync(string id);
 	}
 }
