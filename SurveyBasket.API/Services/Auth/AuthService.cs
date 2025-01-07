@@ -124,15 +124,20 @@ namespace SurveyBasket.API.Services.Auth
 			//if (!isValidPassword)
 			//	return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
-			var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+			if (user.IsDisabled)
+				return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
+
+			var result = await _signInManager.PasswordSignInAsync(user, password, false, true);
 
 			if (!result.Succeeded)
 			{
-				// check if email is confirmed or not
-				return Result.Failure<AuthResponse>(
-					result.IsNotAllowed
-					? UserErrors.EmailNotConfirmed
-					: UserErrors.InvalidCredentials);
+				var error = result.IsNotAllowed
+							? UserErrors.EmailNotConfirmed
+							: result.IsLockedOut
+							? UserErrors.LockedUser
+							: UserErrors.InvalidCredentials;
+
+				return Result.Failure<AuthResponse>(error);
 			}
 
 			var authResponse = await getAuthResponse(user);
@@ -184,6 +189,12 @@ namespace SurveyBasket.API.Services.Auth
 
 			if (user is null)
 				return Result.Failure<AuthResponse>(UserErrors.InvalidJwtToken);
+
+			if (user.IsDisabled)
+				return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
+
+			if (user.LockoutEnd > DateTime.UtcNow)
+				return Result.Failure<AuthResponse>(UserErrors.LockedUser);
 
 			var userRefreshToken = user.RefreshTokens.SingleOrDefault(e => e.Token == refreshToken && e.IsActive);
 

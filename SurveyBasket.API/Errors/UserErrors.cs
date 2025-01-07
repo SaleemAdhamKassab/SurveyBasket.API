@@ -38,5 +38,13 @@ namespace SurveyBasket.API.Errors
 		public static readonly Error DuplicatedConfirmation = new("User.duplicatedConfirmation",
 															   "Email already confirmed",
 																StatusCodes.Status400BadRequest);
+
+		public static readonly Error DisabledUser = new("User.DisabledUser",
+															   "Disabled User, please contact your Admin",
+																StatusCodes.Status400BadRequest);
+
+		public static readonly Error LockedUser = new("User.LockedUser",
+															   "Locked User, please contact your Admin",
+																StatusCodes.Status400BadRequest);
 	}
 }
