@@ -27,7 +27,7 @@ namespace SurveyBasket.API.Services.Auth
 
 			var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
 			var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-			var expiresIn = 30;
+			var expiresIn = 1000;
 			var expirationDate = DateTime.UtcNow.AddMinutes(expiresIn);
 
 			var token = new JwtSecurityToken(

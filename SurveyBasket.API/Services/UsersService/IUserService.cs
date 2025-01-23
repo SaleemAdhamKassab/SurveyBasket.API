@@ -6,6 +6,9 @@ namespace SurveyBasket.API.Services.UsersService
 {
 	public interface IUserService
 	{
+		Task<IEnumerable<UserResponse>> GetAllAsync();
+		Task<Result<UserResponse>> GetAsync(string userId);
+		Task<Result<UserResponse>> AddAsync(CreateUserRequest request);
 		Task<Result<UserProfileResponse>> GetProfileAsync(string userId);
 		Task<Result> UpdateProfileAsync(string userId, UpdateProfileRequest request);
 		Task<Result> ChangePasswordAsync(string userId, ChangePasswordRequest request);
