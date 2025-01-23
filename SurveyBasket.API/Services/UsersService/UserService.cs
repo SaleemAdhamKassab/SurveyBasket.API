@@ -118,6 +118,47 @@ namespace SurveyBasket.API.Services.UsersService
 
 			return Result.Success(result);
 		}
+		public async Task<Result> UpdateAsync(string userId, UpdateUserRequest request)
+		{
+			var emailIsExists = await _userManager.Users.AnyAsync(e => e.Email == request.Email && e.Id != userId);
+
+			if (emailIsExists)
+				return Result.Failure(UserErrors.DuplicatedEmail);
+
+			var allowedRoles = await _roleService.GetAllAsync(false);
+
+			if (request.Roles.Except(allowedRoles.Select(e => e.Name)).Any())
+				return Result.Failure(UserErrors.InvalidRoles);
+
+			var user = await _userManager.FindByEmailAsync(request.Email);
+
+			if (user is null)
+				return Result.Failure(UserErrors.UserNotFound);
+
+			user.FirstName = request.FirstName;
+			user.LastName = request.LastName;
+			user.UserName = request.Email;
+			user.Email = request.Email;
+			user.NormalizedEmail = request.Email.ToUpper();
+
+			var updateResult = await _userManager.UpdateAsync(user);
+
+			if (!updateResult.Succeeded)
+			{
+				var error = updateResult.Errors.First();
+				return Result.Failure<UserResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+			}
+
+			// delete all user's old roles
+			await _db.UserRoles
+				  .Where(e => e.UserId == userId)
+				  .ExecuteDeleteAsync();
+
+			// add new roles
+			await _userManager.AddToRolesAsync(user, request.Roles);
+
+			return Result.Success();
+		}
 		public async Task<Result<UserProfileResponse>> GetProfileAsync(string userId)
 		{
 			var user = await _userManager.Users
@@ -165,4 +206,4 @@ namespace SurveyBasket.API.Services.UsersService
 			return Result.Success();
 		}
 	}
-}  
+}

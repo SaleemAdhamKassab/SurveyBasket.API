@@ -9,6 +9,7 @@ namespace SurveyBasket.API.Services.UsersService
 		Task<IEnumerable<UserResponse>> GetAllAsync();
 		Task<Result<UserResponse>> GetAsync(string userId);
 		Task<Result<UserResponse>> AddAsync(CreateUserRequest request);
+		Task<Result> UpdateAsync(string userId, UpdateUserRequest request);
 		Task<Result<UserProfileResponse>> GetProfileAsync(string userId);
 		Task<Result> UpdateProfileAsync(string userId, UpdateProfileRequest request);
 		Task<Result> ChangePasswordAsync(string userId, ChangePasswordRequest request);

@@ -39,7 +39,17 @@ namespace SurveyBasket.API.Controllers
 		{
 			var result = await _userService.AddAsync(request);
 
-			return result.IsSuccess ? CreatedAtAction(nameof(Get),new {result.Value.Id }, result.Value): result.ToProblem();
+			return result.IsSuccess ? CreatedAtAction(nameof(Get), new { result.Value.Id }, result.Value) : result.ToProblem();
+		}
+
+
+		[HttpPut("{userId}")]
+		[HasPermission(Permissions.UpdateUsers)]
+		public async Task<IActionResult> Update([FromRoute] string userId, UpdateUserRequest request)
+		{
+			var result = await _userService.UpdateAsync(userId, request);
+
+			return result.IsSuccess ? NoContent() : result.ToProblem();
 		}
 	}
 }
