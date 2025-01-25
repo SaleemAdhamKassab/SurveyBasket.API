@@ -52,7 +52,7 @@ namespace SurveyBasket.API.Services.QuestionsService
 				return Result.Failure<PaginatedList<QuestionResponse>>(PollErrors.PollNotFound);
 
 			var query = _db.Questions
-				.Where(e => e.PollId == pollId)
+				.Where(e => e.PollId == pollId && (string.IsNullOrEmpty(filters.SearchValue) || e.Content.Contains(filters.SearchValue)))
 				.Select(e => new QuestionResponse
 				{
 					Id = e.Id,
