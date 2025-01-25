@@ -1,14 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SurveyBasket.API.Abstractions;
 using SurveyBasket.API.Abstractions.ApiResult;
-using SurveyBasket.API.Abstractions.Result;
-using SurveyBasket.API.Contracts.Answers;
 using SurveyBasket.API.Contracts.Answers.Responses;
+using SurveyBasket.API.Contracts.Common;
 using SurveyBasket.API.Contracts.Questions.Requests;
 using SurveyBasket.API.Contracts.Questions.Responses;
 using SurveyBasket.API.Errors;
 using SurveyBasket.API.Models;
 using SurveyBasket.API.Models.Data;
-using System.Threading;
 
 namespace SurveyBasket.API.Services.QuestionsService
 {
@@ -45,14 +44,14 @@ namespace SurveyBasket.API.Services.QuestionsService
 			return Result.Success(question);
 		}
 
-		public async Task<Result<List<QuestionResponse>>> GetAllAsync(int pollId)
+		public async Task<Result<PaginatedList<QuestionResponse>>> GetAllAsync(int pollId, RequestFilters filters)
 		{
 			var pollIsExists = await _db.Polls.AnyAsync(e => e.Id == pollId);
 
 			if (!pollIsExists)
-				return Result.Failure<List<QuestionResponse>>(PollErrors.PollNotFound);
+				return Result.Failure<PaginatedList<QuestionResponse>>(PollErrors.PollNotFound);
 
-			var questions = await _db.Questions
+			var query = _db.Questions
 				.Where(e => e.PollId == pollId)
 				.Select(e => new QuestionResponse
 				{
@@ -64,10 +63,11 @@ namespace SurveyBasket.API.Services.QuestionsService
 						Content = a.Content
 					})
 				})
-				.AsNoTracking()
-				.ToListAsync();
+				.AsNoTracking();
 
-			return Result.Success(questions);
+			var result = await PaginatedList<QuestionResponse>.CreateAsync(query, filters.PageNumber, filters.PageSize);
+
+			return Result.Success(result);
 		}
 		public async Task<Result<List<QuestionResponse>>> GetAvailableAsync(int pollId, string userId)
 		{
