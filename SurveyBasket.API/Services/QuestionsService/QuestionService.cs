@@ -8,6 +8,7 @@ using SurveyBasket.API.Contracts.Questions.Responses;
 using SurveyBasket.API.Errors;
 using SurveyBasket.API.Models;
 using SurveyBasket.API.Models.Data;
+using System.Linq.Dynamic.Core;
 
 namespace SurveyBasket.API.Services.QuestionsService
 {
@@ -52,20 +53,29 @@ namespace SurveyBasket.API.Services.QuestionsService
 				return Result.Failure<PaginatedList<QuestionResponse>>(PollErrors.PollNotFound);
 
 			var query = _db.Questions
-				.Where(e => e.PollId == pollId && (string.IsNullOrEmpty(filters.SearchValue) || e.Content.Contains(filters.SearchValue)))
-				.Select(e => new QuestionResponse
-				{
-					Id = e.Id,
-					Content = e.Content,
-					Answers = e.Answers.Select(a => new AnswerResponse
-					{
-						Id = a.Id,
-						Content = a.Content
-					})
-				})
-				.AsNoTracking();
+				.Where(e => e.PollId == pollId);
 
-			var result = await PaginatedList<QuestionResponse>.CreateAsync(query, filters.PageNumber, filters.PageSize);
+			if (!string.IsNullOrEmpty(filters.SearchValue))
+				query = query.Where(e => e.Content.Contains(filters.SearchValue!));
+
+			if (!string.IsNullOrEmpty(filters.SortColumn))
+				query = query.OrderBy($"{filters.SortColumn} {filters.SortDirection}");
+
+			var questions = query
+			.Select(e => new QuestionResponse
+			{
+				Id = e.Id,
+				Content = e.Content,
+				Answers = e.Answers.Select(a => new AnswerResponse
+				{
+					Id = a.Id,
+					Content = a.Content
+				})
+			})
+			.OrderBy(e => e.Content)
+			.AsNoTracking();
+
+			var result = await PaginatedList<QuestionResponse>.CreateAsync(questions, filters.PageNumber, filters.PageSize);
 
 			return Result.Success(result);
 		}
