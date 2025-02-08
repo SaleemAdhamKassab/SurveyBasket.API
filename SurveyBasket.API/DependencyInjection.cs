@@ -57,6 +57,13 @@ namespace SurveyBasket.API
 			services.Configure<MailOptions>(configuration.GetSection(nameof(MailOptions)));
 			services.AddHttpContextAccessor();
 			services.AddHangfireConfig(configuration);
+			services.AddHealthChecks()
+				.AddSqlServer("database", configuration.GetConnectionString("DefaultConnection")!)
+				.AddHangfire(options =>
+				{
+					options.MinimumAvailableServers = 1;
+					options.MaximumJobsFailed = 1;
+				});
 
 			return services;
 		}
