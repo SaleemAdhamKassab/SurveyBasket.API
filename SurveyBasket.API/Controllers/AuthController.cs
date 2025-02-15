@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SurveyBasket.API.Abstractions.ApiResult;
 using SurveyBasket.API.Contracts.Auth.Requests;
 using SurveyBasket.API.Contracts.Users.Requests;
@@ -8,6 +9,7 @@ namespace SurveyBasket.API.Controllers
 {
 	[Route("[controller]")]
 	[ApiController]
+	[EnableRateLimiting("IpLimit")]
 	public class AuthController(IAuthService authService) : ControllerBase
 	{
 		private readonly IAuthService _authService = authService;
@@ -20,6 +22,7 @@ namespace SurveyBasket.API.Controllers
 		}
 
 		[HttpPost("Regiser")]
+		[DisableRateLimiting]
 		public async Task<IActionResult> Regiser(RegisterRequest request)
 		{
 			var result = await _authService.RegisterAsync(request);

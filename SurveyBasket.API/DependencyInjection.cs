@@ -24,6 +24,7 @@ using SurveyBasket.API.Services.UsersService;
 using Microsoft.AspNetCore.Authorization;
 using SurveyBasket.API.Contracts.Auth.Filters;
 using SurveyBasket.API.Services.RolesService;
+using System.Threading.RateLimiting;
 
 namespace SurveyBasket.API
 {
@@ -32,17 +33,8 @@ namespace SurveyBasket.API
 		public static IServiceCollection AddDependecies(this IServiceCollection services, IConfiguration configuration)
 		{
 			services.AddControllers();
-			services.AddCors(options => options.AddDefaultPolicy(builder => builder
-					.AllowAnyMethod()
-					.AllowAnyHeader()
-					.WithOrigins(configuration.GetSection("AllowedOrigins").Get<string[]>()!))
-			);
-
 			services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-			services
-				.AddSwaggerConfig()
-				.AddFluentValidationConfig()
-				.AddAuthConfig(configuration);
+			services.AddSwaggerConfig().AddFluentValidationConfig().AddAuthConfig(configuration);
 			services.AddScoped<IPollService, PollService>();
 			services.AddScoped<IQuestionService, QuestionService>();
 			services.AddScoped<IVoteService, VoteService>();
@@ -51,20 +43,18 @@ namespace SurveyBasket.API
 			services.AddScoped<IEmailSender, EmailSender>();
 			services.AddScoped<IPollsNotificationService, PollsNotificationService>();
 			services.AddScoped<IRoleService, RoleService>();
-
 			services.AddExceptionHandler<GlobalExceptionHandler>();
 			services.AddProblemDetails();
 			services.Configure<MailOptions>(configuration.GetSection(nameof(MailOptions)));
 			services.AddHttpContextAccessor();
 			services.AddHangfireConfig(configuration);
-			services.AddHealthChecks()
-				.AddSqlServer("database", configuration.GetConnectionString("DefaultConnection")!)
-				.AddHangfire(options =>
-				{
-					options.MinimumAvailableServers = 1;
-					options.MaximumJobsFailed = 1;
-				});
-
+			services.AddHealthCheckConfig(configuration);
+			services.AddRateLimitConfig();
+			services.AddCors(options => options.AddDefaultPolicy(builder => builder
+					.AllowAnyMethod()
+					.AllowAnyHeader()
+					.WithOrigins(configuration.GetSection("AllowedOrigins").Get<string[]>()!))
+			);
 			return services;
 		}
 
@@ -168,6 +158,38 @@ namespace SurveyBasket.API
 			);
 
 			services.AddHangfireServer();
+
+			return services;
+		}
+
+		private static IServiceCollection AddHealthCheckConfig(this IServiceCollection services, IConfiguration configuration)
+		{
+			services.AddHealthChecks()
+				.AddSqlServer("database", configuration.GetConnectionString("DefaultConnection")!)
+				.AddHangfire(options =>
+				{
+					options.MinimumAvailableServers = 1;
+					options.MaximumJobsFailed = 1;
+				});
+
+			return services;
+		}
+
+		private static IServiceCollection AddRateLimitConfig(this IServiceCollection services)
+		{
+			services.AddRateLimiter(options =>
+			{
+				options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+				options.AddPolicy("IpLimit", httpContext =>
+				RateLimitPartition.GetFixedWindowLimiter(
+					partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+					factory: _ => new FixedWindowRateLimiterOptions
+					{
+						PermitLimit = 2,
+						Window = TimeSpan.FromSeconds(20)
+					}
+				));
+			});
 
 			return services;
 		}
