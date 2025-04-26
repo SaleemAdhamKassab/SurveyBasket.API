@@ -17,10 +17,10 @@ namespace SurveyBasket.API.Services.RolesService
 		private readonly RoleManager<ApplicationRole> _roleManager = roleManager;
 
 
-		public async Task<IEnumerable<RoleResponse>> GetAllAsync(bool? includeDisables = false)
+		public async Task<IEnumerable<RoleResponse>> GetAllAsync(bool includeDisables = false)
 		{
 			var roles = await _roleManager.Roles
-				.Where(e => !e.IsDefault && (!e.IsDeleted || includeDisables == true))
+				.Where(e => !e.IsDefault && (!e.IsDeleted || includeDisables))
 				.Select(e => new RoleResponse
 				{
 					Id = e.Id,
@@ -150,7 +150,7 @@ namespace SurveyBasket.API.Services.RolesService
 		{
 			if (await _roleManager.FindByIdAsync(id) is not { } role)
 				return Result.Failure<RoleDetailResponse>(RoleErrors.RoleNotFound);
-			
+
 			role.IsDeleted = !role.IsDeleted;
 			await _roleManager.UpdateAsync(role);
 
